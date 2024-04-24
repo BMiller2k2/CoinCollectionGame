@@ -7,6 +7,8 @@ class Scene2 extends Phaser.Scene {
 // Initial Asset creation...
     this.background = this.add.tileSprite(0, 0, config.width, config.height, "background");
     this.background.setOrigin(0, 0);
+    this.scrollSpeed = 1;
+    this.scrollBackground();
 
     this.coin = this.add.sprite(config.width / 2 - 50, config.height / 2, "coin");
     this.coin2 = this.add.sprite(config.width / 2 - 50, config.height / 2, "coin");
@@ -87,6 +89,18 @@ class Scene2 extends Phaser.Scene {
     this.music.play(musicConfig);
 
   }
+  //Moves the background from left to right.
+  scrollBackground() {
+    this.time.addEvent({
+      delay: 26,
+      loop: true,
+      callback: () => {
+        this.background.tilePositionX += this.scrollSpeed;
+        this.background.tilePositionY = 0;
+      }
+    });
+  }
+
 //Interaction when player hits a monster. Plays a damage sound, resets the monster and player. Sets score to zero.
   hitMonster(player, monster) {
     this.resetCoinPos(monster);
@@ -188,3 +202,4 @@ class Scene2 extends Phaser.Scene {
     coin.x = randomX;
   }
 }
+
