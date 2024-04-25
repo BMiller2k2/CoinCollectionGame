@@ -75,6 +75,7 @@ class Scene2 extends Phaser.Scene {
     //Sound configuration
     this.pickupSound = this.sound.add("audio_pickup");
     this.music = this.sound.add("music");
+    this.powerUpSound = this.sound.add("powerUpSound");
     this.damageSound = this.sound.add("audio_damage");
 
     var musicConfig = {
@@ -85,10 +86,69 @@ class Scene2 extends Phaser.Scene {
       seek: 0,
       loop: false,
       delay: 0
-    }
+    };
     this.music.play(musicConfig);
 
+    // Power-up related variables...
+    this.powerUpCount = 0;
+    this.powerUpSpawnTimer = this.time.addEvent({
+      delay: 10000, // 10 seconds
+      loop: true,
+      callback: this.spawnPowerUp,
+      callbackScope: this,
+    });
   }
+
+  spawnPowerUp() {
+    var powerUp = this.physics.add.image(
+      Phaser.Math.Between(0, config.width), 0, "powerUp");
+    powerUp.setScale(4);
+    powerUp.setVelocityY(100);
+    powerUp.setCollideWorldBounds(true);
+    powerUp.setBounce(1);
+    this.physics.add.overlap(
+      this.player,powerUp,
+      this.collectPowerUp,
+      null,
+      this
+    );
+  }
+
+  // Function to handle power-up collection
+  collectPowerUp(player, powerUp) {
+    powerUp.destroy(); 
+    this.powerUpCount++;
+    this.powerUpSound.play();
+
+    if (this.powerUpCount >= 1) {
+      this.score *= 10;
+      this.powerUpCount = 0;
+
+      var powerUpText = this.add.bitmapText(
+        config.width / 2,
+        config.height / 2,
+        "pixelFont",
+        "Score x10",
+        32
+      );
+      powerUpText.setOrigin(0.5);
+      powerUpText.setTint(0x000000);
+
+      // Deactivate the text after 3 seconds
+      this.time.delayedCall(
+        3000,
+        function () {
+          powerUpText.destroy();
+        },
+        [],
+        this
+      );
+    }
+    // Update score label
+    var scoreFormated = this.zeroPad(this.score, 6);
+    this.scoreLabel.text = "SCORE " + scoreFormated;
+  }
+
   //Moves the background from left to right.
   scrollBackground() {
     this.time.addEvent({
